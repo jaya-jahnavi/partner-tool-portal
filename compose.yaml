@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: portal
+      MYSQL_USER: portal
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysqladmin ping -h localhost -u portal --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  api:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment: &portal-env
+      DB_ENGINE: mysql
+      DB_HOST: db
+      DB_USER: portal
+      DB_NAME: portal
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      PORTAL_ORIGIN: http://localhost:8000
+      COOKIE_SECURE: "0"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  worker:
+    build: .
+    command: ["python", "-m", "app.worker"]
+    environment: *portal-env
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  mysql-data:

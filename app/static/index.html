@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relay | Partner Tool Portal</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js" defer>
+</script>
+</head>
+<body>
+<div id="login-view" class="login-layout">
+<section class="login-story">
+<a class="brand" href="/">r<span>relay</span>
+</a>
+<div>
+<span class="eyebrow">PARTNER TOOL PORTAL</span>
+<h1>Good tools.<br>Ready for everyone.</h1>
+<p>A shared workspace for running validation tools, tracking jobs, and turning datasets into clear results.</p>
+<div class="story-lines">
+<span>01 &nbsp; Submit your dataset</span>
+<span>02 &nbsp; Let the worker take over</span>
+<span>03 &nbsp; Review and share results</span>
+</div>
+</div>
+<small>Independent engineering portfolio project</small>
+</section>
+<main class="login-form">
+<div class="login-card">
+<span class="eyebrow">WELCOME TO RELAY</span>
+<h2>Your tools, in one place.</h2>
+<p class="muted">Sign in to your organization’s workspace.</p>
+<form id="login-form">
+<label for="email">Email address</label>
+<input id="email" type="email" autocomplete="username" placeholder="you@organization.com" required>
+<label for="password">Password</label>
+<input id="password" type="password" autocomplete="current-password" required>
+<p id="login-error" class="error" role="alert">
+</p>
+<button class="primary wide" type="submit">Sign in <span>→</span>
+</button>
+</form>
+<p class="login-note">Local demo accounts are created during setup.<br>See <code>.local/demo-credentials.json</code>.</p>
+</div>
+</main>
+</div>
+<div id="app-view" hidden>
+<aside class="sidebar">
+<a class="brand" href="/">r<span>relay</span>
+</a>
+<div class="workspace-label">WORKSPACE</div>
+<nav aria-label="Main navigation">
+<button data-view="overview" class="nav-item active">
+<span>◈</span> Overview</button>
+<button data-view="jobs" class="nav-item">
+<span>≡</span> All jobs <span id="nav-count" class="nav-count">0</span>
+</button>
+<button data-view="tools" class="nav-item">
+<span>▦</span> Tool library</button>
+<button data-view="audit" id="audit-nav" class="nav-item" hidden>
+<span>◷</span> Audit log</button>
+</nav>
+<div class="sidebar-bottom">
+<div class="environment">
+<i>
+</i> Local environment</div>
+<p>Purpose-built tools.<br>One shared workspace.</p>
+<div class="profile">
+<span class="avatar" id="avatar">S</span>
+<div>
+<strong id="user-name">
+</strong>
+<small id="user-role">
+</small>
+</div>
+<button id="logout" aria-label="Sign out">↪</button>
+</div>
+</div>
+</aside>
+<div class="main-shell">
+<header class="topbar">
+<div>
+<span class="breadcrumb">Workspace</span>
+<span class="slash">/</span>
+<span id="page-label">Overview</span>
+</div>
+<div class="topbar-right">
+<span id="org-label">
+</span>
+<span class="pill">CSV Validator v1.0</span>
+</div>
+</header>
+<main class="main-content">
+<div id="notice" role="status" hidden>
+</div>
+<section class="page-heading">
+<div>
+<span class="eyebrow">YOUR OPERATIONS, AT A GLANCE</span>
+<h1 id="page-title">Workspace overview</h1>
+<p id="page-description" class="muted">From raw data to reliable results. Keep your validation work moving.</p>
+</div>
+<button id="new-job" class="primary">+ &nbsp; New validation</button>
+</section>
+<div id="overview-section">
+<div class="stats">
+<article class="stat">
+<div>Total jobs <span>↗</span>
+</div>
+<strong id="stat-total">0</strong>
+<small>Across your visible workspace</small>
+</article>
+<article class="stat">
+<div>Completed <span class="green">✓</span>
+</div>
+<strong id="stat-completed">0</strong>
+<small>Reports ready to review</small>
+</article>
+<article class="stat">
+<div>In progress <span class="purple">◷</span>
+</div>
+<strong id="stat-active">0</strong>
+<small>Queued or processing</small>
+</article>
+<article class="stat">
+<div>Needs attention <span class="orange">!</span>
+</div>
+<strong id="stat-attention">0</strong>
+<small>Findings or failed jobs</small>
+</article>
+</div>
+<section class="feature-card">
+<div class="feature-icon">▤</div>
+<div>
+<span class="eyebrow">DATA QUALITY, WITHOUT THE GUESSWORK</span>
+<h2>Meet your dataset’s first checkpoint.</h2>
+<p>Check missing values, duplicate rows, and column structure in a single run.</p>
+<button id="sample-job" class="text-button">Run a sample validation →</button>
+</div>
+<div class="feature-art" aria-hidden="true">
+<div>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</div>
+<b>✓</b>
+<span>DATASET CHECKED</span>
+<em>Structure. Completeness. Clarity.</em>
+</div>
+</section>
+</div>
+<section id="jobs-section" class="panel">
+<div class="panel-heading">
+<div>
+<h2 id="table-title">Recent jobs <span id="job-count" class="count">0</span>
+</h2>
+<p class="muted">Track progress and open a job to explore its report.</p>
+</div>
+<div class="table-controls">
+<label class="search">
+<span>⌕</span>
+<input id="search" type="search" placeholder="Search filenames..." aria-label="Search filenames">
+</label>
+<select id="status-filter" aria-label="Filter job status">
+<option value="">All statuses</option>
+<option>queued</option>
+<option>running</option>
+<option>completed</option>
+<option>failed</option>
+<option>cancelled</option>
+</select>
+</div>
+</div>
+<div class="table-scroll">
+<table>
+<thead>
+<tr>
+<th>FILE / JOB</th>
+<th>ORGANIZATION</th>
+<th>STATUS</th>
+<th>DATA QUALITY</th>
+<th>SUBMITTED</th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody id="jobs-body">
+</tbody>
+</table>
+</div>
+<div id="empty-state" class="empty" hidden>
+<span>▤</span>
+<h3>A clear workspace. A fresh start.</h3>
+<p>Submit your first CSV or run the sample dataset to see Relay in action.</p>
+<button id="empty-sample" class="secondary">Try sample dataset →</button>
+</div>
+<footer class="panel-footer">
+<span id="result-count">Showing 0 jobs</span>
+<span>
+<i class="live-dot">
+</i> Updates every 3 seconds</span>
+</footer>
+</section>
+<section id="tools-section" hidden class="panel tool-panel">
+<span class="tool-symbol">▤</span>
+<span class="badge completed">Available</span>
+<h2>CSV Dataset Validator</h2>
+<p>Inspect a CSV for missing values, duplicate rows, column consistency, inferred types, and numeric ranges.</p>
+<div class="tool-limits">
+<span>1 MB maximum</span>
+<span>10,000 rows</span>
+<span>100 columns</span>
+</div>
+<button id="tool-run" class="primary">Run validator →</button>
+<p class="muted">Reports flag data quality issues; they do not certify suitability for model training.</p>
+</section>
+<section id="audit-section" hidden class="panel">
+<div class="panel-heading">
+<div>
+<h2>Workspace audit log</h2>
+<p class="muted">Latest 100 user actions. Visible to administrators.</p>
+</div>
+</div>
+<div class="table-scroll">
+<table>
+<thead>
+<tr>
+<th>WHEN</th>
+<th>ACTOR</th>
+<th>ACTION</th>
+<th>ORGANIZATION</th>
+</tr>
+</thead>
+<tbody id="audit-body">
+</tbody>
+</table>
+</div>
+</section>
+<footer class="workspace-footer">
+<span>RELAY / PARTNER TOOL PORTAL</span>
+<span id="access-note">Organization-scoped access · Audited actions</span>
+</footer>
+</main>
+</div>
+</div>
+<dialog id="submit-dialog">
+<div class="dialog-heading">
+<div>
+<span class="eyebrow">CSV DATASET VALIDATOR</span>
+<h2>Start a new validation</h2>
+</div>
+<button class="close-dialog icon-button" aria-label="Close">×</button>
+</div>
+<p class="muted">Upload a CSV. We’ll check its structure, completeness, and duplicate records.</p>
+<form id="submit-form">
+<label class="dropzone" id="dropzone" for="csv-file">
+<span>↑</span>
+<strong id="file-label">Choose a CSV or drop it here</strong>
+<small>UTF-8 CSV · Up to 1 MB · 10,000 rows</small>
+<input id="csv-file" type="file" accept=".csv,text/csv">
+</label>
+<div class="sample-note">
+<span>Just exploring?</span>
+<button type="button" id="use-sample" class="text-button">Use sample dataset →</button>
+</div>
+<div class="scope-note">◈ &nbsp; This job will belong to <strong id="submit-org">
+</strong>.</div>
+<p id="submit-error" class="error" role="alert">
+</p>
+<div class="dialog-actions">
+<button type="button" class="secondary close-dialog">Cancel</button>
+<button type="submit" class="primary" id="submit-button">Start validation →</button>
+</div>
+</form>
+</dialog>
+<dialog id="detail-dialog">
+<div class="dialog-heading">
+<div>
+<span class="eyebrow">VALIDATION REPORT</span>
+<h2 id="detail-title">
+</h2>
+</div>
+<button class="close-dialog icon-button" aria-label="Close">×</button>
+</div>
+<div id="detail-body">
+</div>
+<div class="dialog-actions" id="detail-actions">
+</div>
+</dialog>
+</body>
+</html>

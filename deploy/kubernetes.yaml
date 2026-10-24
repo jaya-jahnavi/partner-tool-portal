@@ -1,0 +1,95 @@
+# Reference manifests. Configure your own image, namespace, MySQL and TLS ingress.
+# No public ingress is created by this file.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portal-config
+data:
+  DB_ENGINE: mysql
+  DB_HOST: mysql.default.svc.cluster.local
+  DB_USER: portal
+  DB_NAME: portal
+  PORTAL_ORIGIN: https://portal.example.invalid
+  COOKIE_SECURE: "1"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels: {app: portal-api}
+  template:
+    metadata:
+      labels: {app: portal-api}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: api
+          image: partner-tool-portal:1.0.0
+          ports: [{containerPort: 8000}]
+          envFrom:
+            - configMapRef: {name: portal-config}
+            - secretRef: {name: portal-db-secret}
+          env: [{name: PORTAL_DATA, value: /tmp/portal}]
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: "1", memory: 512Mi}
+          readinessProbe:
+            httpGet: {path: /health/ready, port: 8000}
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet: {path: /health/live, port: 8000}
+            initialDelaySeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+          volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {}}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: portal-worker}
+  template:
+    metadata:
+      labels: {app: portal-worker}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: worker
+          image: partner-tool-portal:1.0.0
+          command: ["python", "-m", "app.worker"]
+          envFrom:
+            - configMapRef: {name: portal-config}
+            - secretRef: {name: portal-db-secret}
+          env: [{name: PORTAL_DATA, value: /tmp/portal}]
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: "1", memory: 512Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+          volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {}}]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal
+spec:
+  selector: {app: portal-api}
+  ports: [{port: 80, targetPort: 8000}]

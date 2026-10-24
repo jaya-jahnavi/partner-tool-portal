@@ -1,0 +1,7 @@
+device_id,temperature,battery_pct,site
+D-001,24.3,92,Shenzhen
+D-002,25.1,87,Shanghai
+D-003,,76,Shenzhen
+D-002,25.1,87,Shanghai
+D-004,23.8,95,Seattle
+D-005,26.2,,Seattle
